@@ -70,7 +70,7 @@ public class techfinal {
         Map<String, String> urlMap = new LinkedHashMap<String, String>();
 
         try {
-            String rootUrl = "https://www.aozora.gr.jp/access_ranking/2017_05_xhtml.html"; // 2017年ランキング
+            String rootUrl = "https://www.aozora.gr.jp/access_ranking/2017_xhtml.html"; // 2017年ランキング
             Document doc = Jsoup.connect(rootUrl).get(); // ページの内容を要求し、その内容をDocument型のdocとして取り回していく
             try {
                 Thread.sleep(1000);
@@ -88,8 +88,8 @@ public class techfinal {
                     continue;
                 }
 
-                // 今回は4位まで
-                if (cnt == 5) {
+                // 今回は50位まで
+                if (cnt == 52) {
                     break;
                 }
 
@@ -352,26 +352,22 @@ public class techfinal {
 
                 // css埋め込み
                 bw.write("<style type=\"text/css\">");
-                bw.write("a:link { color:#909090; text-decoration:none; font-size: 3em;}");
-                bw.write("a:visited { color:#909090; text-decoration:none; font-size: 3em;}");
-                bw.write("a:hover { color:#909090; text-decoration:none; font-size: 3em;}");
-                bw.write("a:active { color:#909090; text-decoration:none; font-size: 3em;}");
-                
-                
+                bw.write("a:link { color:#909090; text-decoration:none; font-size: 2em;}");
+                bw.write("a:visited { color:#909090; text-decoration:none; font-size: 2em;}");
+                bw.write("a:hover { color:#909090; text-decoration:none; font-size: 2em;}");
+                bw.write("a:active { color:#909090; text-decoration:none; font-size: 2em;}");
+
                 bw.write("li {");
                 bw.write("font-family: 'Yu Mincho Light','YuMincho','Yu Mincho','游明朝体',sans-serif;\\");
-                bw.write("font-size: 5em;");
-                bw.write("color: #808080;");
-                bw.write("letter-spacing: 0.05em;");
                 bw.write("}");
-                
-                bw.write("h1 {");
+
+                bw.write("#gainen {");
                 bw.write("font-family: 'Yu Mincho Light','YuMincho','Yu Mincho','游明朝体',sans-serif;\\");
-                bw.write("font-size: 17.25em;");
+                bw.write("font-size: 7.25em;");
                 bw.write("color: #000000;");
                 bw.write("}");
                 bw.write("</style>");
-                
+
                 // JQuery読み込み
                 bw.write("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script>");
                 // javaScriptも中で書き込み
@@ -392,8 +388,8 @@ public class techfinal {
                 // 検索窓の値を呼び出して
 
                 bw.write("if(searchText!==\"\"){");// 検索窓がうまっていたら
-                bw.write("$('#searshresult').attr('style', '');");
-
+                bw.write("$('#searshresult').attr('style', '');");// searshresultのhtmlを書き換え
+                bw.write("$('#searchtitle').text(\"検索結果：\"+searchText);");
                 // bw.write("$('#searchtitle').attr('style', '');");
                 // bw.write("$('#searshresult').removeAttr('class');");//searshresultのhtmlを書き換え
 
@@ -433,8 +429,17 @@ public class techfinal {
 
                 // 検索フォーム
                 bw.write("<form name=\"form1\" id=\"id_form1\" url=\"\" method=\"\">");
-                bw.write("<input type=\"text\" name=\"textBox1\" id=\"id_textBox1\" placeholder=\"検索ワードを入力\">");
-                bw.write("<input type=\"button\" id =\"btn\" value=\"検索\">");
+                bw.write(
+                        "<input type=\"text\" name=\"textBox1\" id=\"id_textBox1\" placeholder=\"検索ワードを入力\" style=\"height:25px;\">");
+                bw.write("<input type=\"button\" id =\"btn\"  value=\"検索\" style = \"display: inline-block;"
+                        + "    padding: 0.3em 1em;" + "    width:100px; margin-left:10px; height:30px;"
+                        + "    text-decoration: none;" + "    color: #909090;" + "    border: solid 1px #909090;"
+                        + "    border-radius: 3px;" + "    background-color:#ffffff;" + "    transition: .4s;\">");
+                bw.write("<input type=\"button\" id =\"topbtn\" value=\"トップ画面へ\" style =\"display: inline-block;"
+                        + "    padding: 0.3em 0.7em;" + "    width:100px; margin-left:10px; height:30px;"
+                        + "    text-decoration: none;" + "    color: #909090;" + "    border: solid 1px #909090;"
+                        + "    border-radius: 3px;" + "    background-color:#ffffff;"
+                        + "    transition: .4s;\" onClick=\"location.href='index.html'\">");
                 bw.write("</form>");
 
                 // 検索結果表示場所
@@ -450,8 +455,6 @@ public class techfinal {
                 for (Map.Entry<String, List<String>> gainens : gainenMap.entrySet()) {// 概念マップをまわして
                     String ichibun = gainens.getKey();
                     List<String> infoList = ichibunMap.get(ichibun);// <作品名,作者,URL>
-                    String name = infoList.get(0);
-                    String author = infoList.get(1);
                     String URL = infoList.get(2);
 
                     bw.write("<li><a href=\"" + URL + "\" class=\"link\">「" + ichibun + "」</a></li>");// 書き込み
@@ -467,14 +470,16 @@ public class techfinal {
                 bw.write("<br>");
 
                 // TOP画面
-                // 概念をランダムに選んで、その概念が含まれる一文を表示させている
+                // 概念をランダムに選んで、その概念が含まれる一文を(一つの作品につきランダムに一つだけ)表示させる
+
                 bw.write("<div id=\"top\">");
                 int i = new java.util.Random().nextInt(gainenData.length);
                 String gainen = gainenData[i];
 
                 bw.write("<h1 id =\"gainen\">" + gainen + "</h1><br>");
 
-                // 一文はリスト化
+                Map<String, List<String>> workStrsMap = new LinkedHashMap<String, List<String>>();
+                // 今回選ばれた概念が含まれる一文のリストとその作品名のマップをつくる
                 bw.write("<ul class=\"target-area\" style=\"list-style: none;\">");
                 for (Map.Entry<String, List<String>> gainens : gainenMap.entrySet()) {//
                     // 概念マップをまわして
@@ -482,17 +487,35 @@ public class techfinal {
                     List<String> gainenList = gainens.getValue();
                     List<String> infoList = ichibunMap.get(ichibun);// <作品名,作者,URL>
                     String name = infoList.get(0);
-                    String author = infoList.get(1);
-                    String URL = infoList.get(2);
-                    if (gainenList.contains(gainen)) {// もしも概念がふくまれていたら
 
-                        bw.write("<li><a href=\"" + URL + "\" class=\"link\">「" + ichibun + "」</a></li>");
-                        // bw.write("<li>" + ichibun + "," + name + "," + author + "," + URL +
-                        // "</li>");// 書き込み
-
+                    if (gainenList.contains(gainen)) {// もしも概念がふくまれていて
+                        if (workStrsMap.containsKey(name)) {// かつ今までにこの作品名のマップをつくっていたら
+                            List<String> workList = workStrsMap.get(name);
+                            workList.add(ichibun);
+                            workStrsMap.put(name, workList);
+                        } else {// はじめての作品なら
+                            List<String> workList = new ArrayList<String>();
+                            workList.add(ichibun);
+                            workStrsMap.put(name, workList);
+                        }
+                        // bw.write("<li><a href=\"" + URL + "\" class=\"link\">「" + ichibun +
+                        // "」</a></li><br>");
                     }
+                }
+
+                // (作品名、<一文リスト>)マップを回して作品ごとにランダムで表示させる
+                for (Map.Entry<String, List<String>> works : workStrsMap.entrySet()) {
+                    List<String> strList = works.getValue();
+
+                    int n = new java.util.Random().nextInt(strList.size());
+                    String meibun = strList.get(n);
+                    List<String> infoList = ichibunMap.get(meibun);// <作品名,作者,URL>
+                    String URL = infoList.get(2);
+
+                    bw.write("<li><a href=\"" + URL + "\" class=\"link\">「" + meibun + "」</a></li><br>");
 
                 }
+
                 bw.write("</ul>");
                 bw.write("</div>");
                 bw.write("<br>");
