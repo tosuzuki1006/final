@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,29 +27,20 @@ public class techfinal {
             // ランキングページををクローリングして、（作品名、作品本文が掲載されているURL）マップをつくる①
             Map<String, String> urlMap = makeUrlMap();
 
-            // ①の動作確認用
-            // kakunin1(urlMap);
-
             // urlマップを回しながら本文をクローリングして、（本文,<作品名,作者,URL>）のマップをつくる②
 
             Map<String, List<String>> nakamiMap = makeNakamiMap(urlMap);
 
-            // ②の動作確認用(OK!)
-            // kakunin2(nakamiMap);
 
             // <一文、<作品名,作者,URL>>マップ作る③
             Map<String, List<String>> ichibunMap = makeIchibunMap(nakamiMap);
 
-            // ③の動作確認
-            // kakunin3(nakamiMap);
 
             // とても適当な概念マスタ
-            String[] gainenData = { "愛", "恋", "死", "神", "罪", "罰", "善", "夢", "美", "老", "病", "金", "男", "女" };
+            String[] gainenData = { "愛", "恋", "死", "神", "罪", "罰", "善", "夢", "美", "老", "病", "金", "男", "女", "時", "悪", "火" };
             // 概念的な言葉が含まれていたら（一つの文、概念）マップに格納④
             Map<String, List<String>> gainenMap = makeGainenMap(ichibunMap, gainenData);
 
-            // ④動作確認
-            // kakunin4(gainenMap);
 
             // 概念順にならべてcsvファイルに書き出し⑤
 
@@ -70,7 +62,7 @@ public class techfinal {
         Map<String, String> urlMap = new LinkedHashMap<String, String>();
 
         try {
-            String rootUrl = "https://www.aozora.gr.jp/access_ranking/2017_xhtml.html"; // 2017年ランキング
+            String rootUrl = "https://www.aozora.gr.jp/access_ranking/2017_12_txt.html"; // 2017年ランキング
             Document doc = Jsoup.connect(rootUrl).get(); // ページの内容を要求し、その内容をDocument型のdocとして取り回していく
             try {
                 Thread.sleep(1000);
@@ -117,14 +109,6 @@ public class techfinal {
         return urlMap;
     }
 
-    private static void kakunin1(Map<String, String> urlMap) {
-        for (Map.Entry<String, String> bar : urlMap.entrySet()) {
-            String title = bar.getKey();
-            String url = bar.getValue();
-            System.out.println(title + "," + url);
-            System.out.println();
-        }
-    }
 
     private static Map<String, List<String>> makeNakamiMap(Map<String, String> urlMap) throws IOException {
 
@@ -176,27 +160,7 @@ public class techfinal {
         return nakamiMap;
     }
 
-    private static void kakunin2(Map<String, List<String>> nakamiMap) throws IOException {
-        Path answerPath = Paths.get("C:\\\\TechTraining\\\\resources\\\\finalCsv.csv");// 書き込み対象ファイルの場所を指定
-        Files.deleteIfExists(answerPath);// もしあったらファイルを削除
-        Files.createFile(answerPath);// ファイル作成
-        try (BufferedWriter bw = Files.newBufferedWriter(answerPath)) {// １行ごとに「書き込む」
 
-            for (Map.Entry<String, List<String>> bar : nakamiMap.entrySet()) {
-                String honbun = bar.getKey();
-                List<String> infoList = bar.getValue();
-                String title = infoList.get(0);
-                String author = infoList.get(1);
-                String url = infoList.get(2);
-
-                bw.write(honbun + "," + title + "," + author + "," + url);
-                bw.newLine();
-            }
-
-        } catch (IOException e) {
-            throw e;
-        }
-    }
 
     private static Map<String, List<String>> makeIchibunMap(Map<String, List<String>> nakamiMap) throws IOException {
 
@@ -221,27 +185,6 @@ public class techfinal {
         return ichibunMap;
     }
 
-    private static void kakunin3(Map<String, List<String>> ichibunMap) throws IOException {
-        Path answerPath = Paths.get("C:\\\\TechTraining\\\\resources\\\\finalCsv.csv");// 書き込み対象ファイルの場所を指定
-        Files.deleteIfExists(answerPath);// もしあったらファイルを削除
-        Files.createFile(answerPath);// ファイル作成
-        try (BufferedWriter bw = Files.newBufferedWriter(answerPath)) {// １行ごとに「書き込む」
-
-            for (Map.Entry<String, List<String>> bar : ichibunMap.entrySet()) {
-                String ichibun = bar.getKey();
-                List<String> infoList = bar.getValue();
-                String title = infoList.get(0);
-                String author = infoList.get(1);
-                String url = infoList.get(2);
-
-                bw.write(ichibun + "," + title + "," + author + "," + url);
-                bw.newLine();
-            }
-
-        } catch (IOException e) {
-            throw e;
-        }
-    }
 
     private static Map<String, List<String>> makeGainenMap(Map<String, List<String>> ichibunMap, String[] gainenData)
             throws IOException {
@@ -268,40 +211,16 @@ public class techfinal {
 
     }
 
-    private static void kakunin4(Map<String, List<String>> gainenMap) throws IOException {
-        Path answerPath = Paths.get("C:\\\\TechTraining\\\\resources\\\\finalCsv.csv");// 書き込み対象ファイルの場所を指定
-        Files.deleteIfExists(answerPath);// もしあったらファイルを削除
-        Files.createFile(answerPath);// ファイル作成
-        try (BufferedWriter bw = Files.newBufferedWriter(answerPath)) {// １行ごとに「書き込む」
 
-            for (Map.Entry<String, List<String>> bar : gainenMap.entrySet()) {
-                String ichibun = bar.getKey();
-                List<String> infoList = bar.getValue();
-                Iterator<String> gainenList = infoList.iterator();
-
-                bw.write(ichibun);
-                while (gainenList.hasNext()) {
-                    String gainen = (String) gainenList.next();
-
-                    bw.write("," + gainen);
-                }
-
-                bw.newLine();
-            }
-
-        } catch (IOException e) {
-            throw e;
-        }
-    }
 
     private static void writeCsv(Map<String, List<String>> ichibunMap, Map<String, List<String>> gainenMap,
             String[] gainenData) throws IOException {
 
         try {
-            Path answerPath = Paths.get("C:\\\\TechTraining\\\\resources\\\\finalCsv.csv");// 書き込み対象ファイルの場所を指定
+            Path answerPath = Paths.get("C:\\TechTraining\\resources\\finalCsv.csv");
             Files.deleteIfExists(answerPath);// もしあったらファイルを削除
             Files.createFile(answerPath);// ファイル作成
-            try (BufferedWriter bw = Files.newBufferedWriter(answerPath)) {// １行ごとに「書き込む」
+            try (BufferedWriter bw = Files.newBufferedWriter(answerPath)) {
                 for (int i = 0; i < gainenData.length; i++) {// 概念マスタを回して
                     String gainen = gainenData[i];
                     bw.write(gainen);
@@ -337,10 +256,10 @@ public class techfinal {
             String[] gainenData) throws IOException {
 
         try {
-            Path answerPath = Paths.get("C:\\\\TechTraining\\\\resources\\\\index.html");// 書き込み対象ファイルの場所を指定
+            Path answerPath = Paths.get("C:\\TechTraining\\resources\\index.html");
             Files.deleteIfExists(answerPath);// もしあったらファイルを削除
             Files.createFile(answerPath);// ファイル作成
-            try (BufferedWriter bw = Files.newBufferedWriter(answerPath)) {// １行ごとに「書き込む」
+            try (BufferedWriter bw = Files.newBufferedWriter(answerPath)) {
 
                 // ヘッダーつくる
 
@@ -352,15 +271,29 @@ public class techfinal {
 
                 // css埋め込み
                 bw.write("<style type=\"text/css\">");
+
+                //リンク
                 bw.write("a:link { color:#909090; text-decoration:none; font-size: 2em;}");
                 bw.write("a:visited { color:#909090; text-decoration:none; font-size: 2em;}");
                 bw.write("a:hover { color:#909090; text-decoration:none; font-size: 2em;}");
                 bw.write("a:active { color:#909090; text-decoration:none; font-size: 2em;}");
 
+
+
+                //body全体
+                bw.write("html, body{\r\n" +
+                        "    margin: 0;         /* 余白の削除 */\r\n" +
+                        "    padding: 0;        /* 余白の削除 */\r\n" +
+                        "    width:100%;\r\n" +
+                        "    height:100%;\r\n" +
+                        "}\r\n" +
+                        "");
+                //リスト
                 bw.write("li {");
                 bw.write("font-family: 'Yu Mincho Light','YuMincho','Yu Mincho','游明朝体',sans-serif;\\");
                 bw.write("}");
 
+                //topタイトル
                 bw.write("#gainen {");
                 bw.write("font-family: 'Yu Mincho Light','YuMincho','Yu Mincho','游明朝体',sans-serif;\\");
                 bw.write("font-size: 7.25em;");
@@ -374,6 +307,7 @@ public class techfinal {
                 bw.write("<script type=\"text/javascript\">");
 
                 bw.write("$(function(){");// jQueryのはじまりだから消しちゃあかん
+
 
                 bw.write("$('#btn').hover(function() {");
 
@@ -390,8 +324,6 @@ public class techfinal {
                 bw.write("if(searchText!==\"\"){");// 検索窓がうまっていたら
                 bw.write("$('#searshresult').attr('style', '');");// searshresultのhtmlを書き換え
                 bw.write("$('#searchtitle').text(\"検索結果：\"+searchText);");
-                // bw.write("$('#searchtitle').attr('style', '');");
-                // bw.write("$('#searshresult').removeAttr('class');");//searshresultのhtmlを書き換え
 
                 bw.write("$('.search-list li').each(function() {");// こいつらを変化させるぜ！
 
@@ -428,6 +360,8 @@ public class techfinal {
                 bw.write("<div class=\"search-area\">");
 
                 // 検索フォーム
+                bw.write("<div class =\"search\" >");
+                bw.write("<header>");
                 bw.write("<form name=\"form1\" id=\"id_form1\" url=\"\" method=\"\">");
                 bw.write(
                         "<input type=\"text\" name=\"textBox1\" id=\"id_textBox1\" placeholder=\"検索ワードを入力\" style=\"height:25px;\">");
@@ -441,13 +375,12 @@ public class techfinal {
                         + "    border-radius: 3px;" + "    background-color:#ffffff;"
                         + "    transition: .4s;\" onClick=\"location.href='index.html'\">");
                 bw.write("</form>");
+                bw.write("</header>");
+                bw.write("</div>");
 
                 // 検索結果表示場所
                 // いったんぜんぶ出力して、jqueryで絞り込み
-                bw.write("<div id=\"searshresult\" style=\"display:none;\">");
-                // bw.write("<div id=\"searshresult\"<!--style=\"display:none;\" -->
-                // >");//あとでcssいれてね！！！
-                // bw.write("<h3 id =\"searchtitle\">検索結果</h3><br>");
+                bw.write("<div id=\"searshresult\" style=\"display:none;\">");;
                 bw.write("<h3 id =\"searchtitle\">検索結果</h3><br>");
                 // 一文はリスト化
                 bw.write("<ul class=\"search-list\" style=\"list-style: none;\">");
@@ -457,7 +390,7 @@ public class techfinal {
                     List<String> infoList = ichibunMap.get(ichibun);// <作品名,作者,URL>
                     String URL = infoList.get(2);
 
-                    bw.write("<li><a href=\"" + URL + "\" class=\"link\">「" + ichibun + "」</a></li>");// 書き込み
+                    bw.write("<li><a href=\"" + URL + "\"  >「" + ichibun + "」</a></li>");// 書き込み
                 }
                 bw.write("</ul>");
 
@@ -478,7 +411,7 @@ public class techfinal {
 
                 bw.write("<h1 id =\"gainen\">" + gainen + "</h1><br>");
 
-                Map<String, List<String>> workStrsMap = new LinkedHashMap<String, List<String>>();
+                Map<String, List<String>> workStrsMap = new HashMap<String, List<String>>();
                 // 今回選ばれた概念が含まれる一文のリストとその作品名のマップをつくる
                 bw.write("<ul class=\"target-area\" style=\"list-style: none;\">");
                 for (Map.Entry<String, List<String>> gainens : gainenMap.entrySet()) {//
@@ -512,7 +445,7 @@ public class techfinal {
                     List<String> infoList = ichibunMap.get(meibun);// <作品名,作者,URL>
                     String URL = infoList.get(2);
 
-                    bw.write("<li><a href=\"" + URL + "\" class=\"link\">「" + meibun + "」</a></li><br>");
+                    bw.write("<li><a href=\"" + URL + "\">「" + meibun + "」</a></li><br>");
 
                 }
 
